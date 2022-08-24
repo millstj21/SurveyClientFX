@@ -1,0 +1,31 @@
+* {
+    dark-primary-color: #F57C00;
+    default-primary-color : #FF9800;
+    light-primary-color : #FFE0B2;
+    text-primary-color : #212121;
+    accent-color : #FFC107;
+    primary-text-color : #212121;
+    secondary-text-color : #757575;
+    divider-color : #BDBDBD;
+
+}
+.root {
+    -fx-background-color : light-primary-color;
+}
+
+.button {
+    -fx-font : 12px "Arial";
+    -fx-text-fill : text-primary-color;
+    -fx-margin : 5;
+    -fx-background-color : default-primary-color;
+    -fx-effect : dropshadow(one-pass-box, black, 14, 0.0, 6, 0);
+    -fx-background-radius : 5;
+}
+.button:disabled {
+    -fx-background-color : default-primary-color;
+    -fx-opacity: 0.3;
+    -fx-effect : none;
+
+}
+
+
