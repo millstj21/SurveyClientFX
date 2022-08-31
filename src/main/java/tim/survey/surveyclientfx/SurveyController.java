@@ -8,13 +8,21 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import tim.survey.surveyclientfx.ClientComs.Client;
 
 public class SurveyController {
 
+    Client comClient;
     @FXML
     private Button btnExit;
     @FXML
+    private Button btnConnect;
+    @FXML
+    private Button btnSend;
+    @FXML
     private TextField txtMessage;
+    @FXML
+    private TextField txtResponse;
     Stage stage;
     @FXML
     private VBox scenePane;
@@ -33,6 +41,19 @@ public class SurveyController {
             stage.close();
         }
 
+    }
+    @FXML
+    void onConnectClicked(ActionEvent event)
+    {
+        comClient = new Client("localhost", 4444, txtMessage);
+        comClient.connect();
+
+    }
+
+    @FXML
+    void onSendClicked(ActionEvent event)
+    {
+        comClient.send(txtResponse.getText());
     }
 
 }
