@@ -6,14 +6,21 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
 public class SurveyApplication extends Application
 {
+    private static final Logger logger = LogManager.getLogger(SurveyApplication.class);
     @Override
     public void start(Stage stage) throws IOException
     {
+        logger.debug("************************************************");
+        logger.debug("Application Starting");
+        logger.debug("************************************************");
+
         FXMLLoader fxmlLoader = new FXMLLoader(SurveyApplication.class.getResource("surveyclient-view.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Survey Questions");

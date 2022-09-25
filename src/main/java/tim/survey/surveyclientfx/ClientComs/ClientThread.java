@@ -1,32 +1,57 @@
 package tim.survey.surveyclientfx.ClientComs;
 
-import java.io.DataInputStream;
+import SurveyMessagePacket.SurveyMessagePacket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 
-public class ClientThread extends Thread
+public class ClientThread implements Runnable
 {
     private Socket socket = null;
     private Client client = null;
-    private DataInputStream streamIn = null;
+    private ObjectInputStream streamIn = null;
+    Thread t;
+    private String name;
+    private int ID =-1;
+    boolean stopFlag;
+    Logger logger;
 
-    public ClientThread(Client _client, Socket _socket)
+
+
+    public static ClientThread createAndStartClientThread(Client inClient, Socket inSocket)
     {
-        client = _client;
-        socket = _socket;
-        open();
-        start();
+        ClientThread newThread = new ClientThread(inClient, inSocket);
+        newThread.t.start();
+        return newThread;
     }
 
-    public void open()
+    public ClientThread(Client inClient, Socket inSocket)
+    {
+        logger = LogManager.getLogger(ClientThread.class);
+        client = inClient;
+        socket = inSocket;
+        ID = socket.getPort();
+        name = "Client Thread " + ID;
+        t = new Thread(this, name);
+        stopFlag = false;
+        //openSocket();
+
+    }
+
+    public void openSocket()
     {
         try
         {
-            streamIn = new DataInputStream(socket.getInputStream());
+            logger.debug("Opening InputStream.");
+            streamIn = new ObjectInputStream(socket.getInputStream());
         }
         catch (IOException ioe)
         {
-            System.out.println("Error getting input stream: " + ioe);
+            logger.error("Error getting input stream: " + ioe.getMessage());
+
             //client2.stop();
             client.close();
         }
@@ -34,6 +59,7 @@ public class ClientThread extends Thread
 
     public void close()
     {
+        logger.debug("Closing InputStream.");
         try
         {
             if (streamIn != null)
@@ -43,24 +69,41 @@ public class ClientThread extends Thread
         }
         catch (IOException ioe)
         {
-            System.out.println("Error closing input stream: " + ioe);
+            logger.error("Error closing input stream: " + ioe.getMessage());
         }
     }
 
+    /**
+     * Thread shutdown logic
+     */
+    public synchronized void stop()
+    {
+        stopFlag = true;
+    }
+    @Override
     public void run()
     {
-        while (true)
+        logger = LogManager.getLogger("Thread:" + Thread.currentThread().getName());
+        logger.debug("Starting Thread.");
+        openSocket();
+
+        while (!stopFlag)
         {
             try
             {
-                client.handle(streamIn.readUTF());
+                client.handle((SurveyMessagePacket) streamIn.readObject());
             }
             catch (IOException ioe)
             {
-                System.out.println("Listening error: " + ioe.getMessage());
+                logger.error("Listening error: " + ioe.getMessage());
                 //client2.stop();
                 client.close();
+            } catch (ClassNotFoundException e)
+            {
+                logger.error("Class not found error: " + e.getMessage());
+                throw new RuntimeException(e);
             }
         }
+        logger.debug("Exiting Thread.");
     }
 }
