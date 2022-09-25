@@ -1,17 +1,15 @@
 package tim.survey.surveyclientfx;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tim.survey.surveyclientfx.ClientComs.Client;
+import tim.survey.surveyclientfx.ClientComs.ClientManager;
 import SurveyMessagePacket.SurveyMessagePacket;
 
 import java.net.URL;
@@ -20,7 +18,7 @@ import java.util.ResourceBundle;
 public class SurveyController implements Initializable
 {
 
-    Client comClient;
+    ClientManager comClientManager;
     SurveyMessagePacket msgPacket;
     Logger logger = LogManager.getLogger();
     @FXML
@@ -36,6 +34,30 @@ public class SurveyController implements Initializable
     Stage stage;
     @FXML
     private VBox scenePane;
+
+    // Question fields
+    @FXML
+    private TextField txtTopic;
+    @FXML
+    private Label lblNum;
+    @FXML
+    private TextField txtAnswer3;
+
+    @FXML
+    private TextField txtAnswer1;
+
+    @FXML
+    private TextField txtAnswer2;
+
+    @FXML
+    private TextField txtAnswer4;
+
+    @FXML
+    private TextField txtAnswer5;
+    @FXML
+    private TextArea txtAreaQuestionText;
+
+
 
 
     @Override
@@ -58,6 +80,11 @@ public class SurveyController implements Initializable
 
         if(alert.showAndWait().get() == ButtonType.OK)
         {
+            if (comClientManager !=null)
+            {
+                comClientManager.close();
+            }
+
             stage = (Stage) scenePane.getScene().getWindow();
             stage.close();
         }
@@ -66,9 +93,9 @@ public class SurveyController implements Initializable
     @FXML
     void onConnectClicked(ActionEvent event)
     {
-        comClient = new Client("localhost", 4444, txtMessage);
+        comClientManager = new ClientManager("localhost", 4444, txtMessage, this);
         logger.debug("Connecting....");
-        comClient.connect();
+        comClientManager.connect();
 
     }
 
@@ -76,9 +103,27 @@ public class SurveyController implements Initializable
     void onSendClicked(ActionEvent event)
     {
         msgPacket = new SurveyMessagePacket();
-        // msgPacket.setQuestionNumber( something );
+        msgPacket.setQuestionNumber(lblNum.getText());
+        msgPacket.setMessageType(SurveyMessagePacket.MessageCodes.Answer);
         msgPacket.setAnswer(Integer.parseInt(txtResponse.getText()));
-        comClient.send(msgPacket);
+        comClientManager.send(msgPacket);
+    }
+
+    public synchronized void displayQuestion(SurveyMessagePacket questionPacket)
+    {
+
+            txtTopic.setText(questionPacket.getTopic());
+            txtAreaQuestionText.setText(questionPacket.getQuestion());
+            lblNum.setText(questionPacket.getQuestionNumber());
+            txtAnswer1.setText(questionPacket.getAnswer1());
+            txtAnswer2.setText(questionPacket.getAnswer2());
+            txtAnswer3.setText(questionPacket.getAnswer3());
+            txtAnswer4.setText(questionPacket.getAnswer4());
+            txtAnswer5.setText(questionPacket.getAnswer5());
+
+
+
+
     }
 
 

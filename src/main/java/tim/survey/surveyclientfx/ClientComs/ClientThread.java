@@ -11,7 +11,7 @@ import java.net.Socket;
 public class ClientThread implements Runnable
 {
     private Socket socket = null;
-    private Client client = null;
+    private ClientManager clientManager = null;
     private ObjectInputStream streamIn = null;
     Thread t;
     private String name;
@@ -21,17 +21,17 @@ public class ClientThread implements Runnable
 
 
 
-    public static ClientThread createAndStartClientThread(Client inClient, Socket inSocket)
+    public static ClientThread createAndStartClientThread(ClientManager inClientManager, Socket inSocket)
     {
-        ClientThread newThread = new ClientThread(inClient, inSocket);
+        ClientThread newThread = new ClientThread(inClientManager, inSocket);
         newThread.t.start();
         return newThread;
     }
 
-    public ClientThread(Client inClient, Socket inSocket)
+    public ClientThread(ClientManager inClientManager, Socket inSocket)
     {
         logger = LogManager.getLogger(ClientThread.class);
-        client = inClient;
+        clientManager = inClientManager;
         socket = inSocket;
         ID = socket.getPort();
         name = "Client Thread " + ID;
@@ -53,7 +53,7 @@ public class ClientThread implements Runnable
             logger.error("Error getting input stream: " + ioe.getMessage());
 
             //client2.stop();
-            client.close();
+            clientManager.close();
         }
     }
 
@@ -91,13 +91,13 @@ public class ClientThread implements Runnable
         {
             try
             {
-                client.handle((SurveyMessagePacket) streamIn.readObject());
+                clientManager.handle((SurveyMessagePacket) streamIn.readObject());
             }
             catch (IOException ioe)
             {
                 logger.error("Listening error: " + ioe.getMessage());
                 //client2.stop();
-                client.close();
+                clientManager.close();
             } catch (ClassNotFoundException e)
             {
                 logger.error("Class not found error: " + e.getMessage());

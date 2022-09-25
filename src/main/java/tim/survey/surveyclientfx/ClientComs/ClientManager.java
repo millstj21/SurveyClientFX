@@ -1,31 +1,35 @@
 package tim.survey.surveyclientfx.ClientComs;
 
 import SurveyMessagePacket.SurveyMessagePacket;
+import javafx.application.Platform;
 import javafx.scene.control.TextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tim.survey.surveyclientfx.SurveyController;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class Client
+public class ClientManager
 {
     private Socket socket = null;
     private ObjectInputStream console = null;
     private ObjectOutputStream streamOut = null;
-    private ClientThread client = null;
+    private ClientThread clientThread = null;
     private String serverName;
     private int serverPort;
     TextField txtMessage;
+    SurveyController controller;
     Logger logger = LogManager.getLogger();
 
 
-    public Client(String server, int servPort, TextField txtMsg)
+    public ClientManager(String server, int servPort, TextField txtMsg, SurveyController guiController)
     {
         txtMessage = txtMsg;
         serverName = server;
         serverPort = servPort;
+        controller = guiController;
     }
 
 
@@ -86,11 +90,19 @@ public class Client
             case Question:
                 // TODO: Handle the question
                 logger.debug("Question number: " + inputPacket.getQuestionNumber() + " received.");
+
+                // need to return the value to the JavaFX thread - use Platform.runLater
+                Platform.runLater(() ->
+                {
+                    controller.displayQuestion(inputPacket);
+                });
+
                 txtMessage.setText("Question number: " + inputPacket.getQuestionNumber() + " received.");
                 break;
         }
 
     }
+
 
     public void open()
     {
@@ -99,7 +111,7 @@ public class Client
         {
             streamOut = new ObjectOutputStream(socket.getOutputStream());
             logger.debug("Creating new ClientThread");
-            client = ClientThread.createAndStartClientThread(this, socket);
+            clientThread = ClientThread.createAndStartClientThread(this, socket);
         }
         catch (IOException ioe)
         {
@@ -111,12 +123,38 @@ public class Client
     public void close()
     {
         logger.debug("Closing StreamOut");
+        // Tell the SurveyServer we are disconnecting
+        SurveyMessagePacket disconnectMessage = new SurveyMessagePacket();
+        disconnectMessage.setMessageType(SurveyMessagePacket.MessageCodes.Disconnect);
         try
         {
+            if(streamOut != null)
+            {
+                logger.debug("Sending: " + disconnectMessage.getMessageType());
+                streamOut.writeObject(disconnectMessage);
+                streamOut.flush();
+            }
+
+        } catch (IOException e)
+        {
+            logger.error("Error sending disconnect message: "+ e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+
+        try
+        {
+            if (clientThread != null)
+            {
+                clientThread.close();
+                clientThread.stop();
+            }
+
             if (streamOut != null)
             {
                 streamOut.close();
             }
+
             logger.debug("Closing Socket");
             if (socket != null)
             {
@@ -128,9 +166,14 @@ public class Client
             logger.error("Error closing ..." + ioe);
             txtMessage.setText("Error closing ...");
         }
-        client.close();
-        client.stop();
+        if (clientThread != null)
+        {
+            // clientThread.close();
+            clientThread.stop();
+        }
+
     }
+
 
     void println(String msg)
     {
