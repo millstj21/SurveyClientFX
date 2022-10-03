@@ -33,7 +33,7 @@ public class ClientManager
     }
 
 
-    public void connect()
+    public boolean connect()
     {
         logger.debug("Establishing connection.");
         txtMessage.setText("Establishing connection. Please wait ...");
@@ -41,18 +41,21 @@ public class ClientManager
         {
             socket = new Socket(serverName, serverPort);
             logger.debug("Connected: " + socket);
-            txtMessage.setText("Connected: " + socket);
+            txtMessage.setText("Connected to Question Server");
             open();
+            return true;
         }
         catch (UnknownHostException uhe)
         {
             logger.error("Host unknown: " + uhe.getMessage());
             txtMessage.setText("Host unknown: " + uhe.getMessage());
+            return false;
         }
         catch (IOException ioe)
         {
             logger.error("Unexpected exception: " + ioe.getMessage());
             txtMessage.setText("Unexpected exception: " + ioe.getMessage());
+            return false;
         }
     }
 
@@ -62,21 +65,20 @@ public class ClientManager
         {
             streamOut.writeObject(response);
             streamOut.flush();
-            logger.debug("Sent");
-            txtMessage.setText("SENT");
-            // txtWord1.setText("");
+            logger.debug("Sent answer: " + response.getAnswer());
+            txtMessage.setText("SENT: " + response.getAnswer());
+
         }
         catch (IOException ioe)
         {
             logger.error("Sending error: " + ioe.getMessage());
-            txtMessage.setText("Sending error: " + ioe.getMessage());
             close();
         }
     }
 
-    public void handle(SurveyMessagePacket inputPacket)
+    public synchronized void handle(SurveyMessagePacket inputPacket)
     {
-        logger.debug("Entering handle.");
+        logger.debug("Entering message handler");
         switch(inputPacket.getMessageType())
         {
             case Answer:
@@ -85,10 +87,11 @@ public class ClientManager
                 txtMessage.setText("ERROR - Message Type: " + inputPacket.getMessageType());
                 break;
             case Disconnect:
-                // TODO: Kill the Thread and send a message back to the GUI
+                // Should not get here
+                logger.debug("Disconnection Message received");
+                clientThread.stop();
                 break;
             case Question:
-                // TODO: Handle the question
                 logger.debug("Question number: " + inputPacket.getQuestionNumber() + " received.");
 
                 // need to return the value to the JavaFX thread - use Platform.runLater
@@ -96,11 +99,8 @@ public class ClientManager
                 {
                     controller.displayQuestion(inputPacket);
                 });
-
-                txtMessage.setText("Question number: " + inputPacket.getQuestionNumber() + " received.");
                 break;
         }
-
     }
 
 
@@ -130,9 +130,12 @@ public class ClientManager
         {
             if(streamOut != null)
             {
-                logger.debug("Sending: " + disconnectMessage.getMessageType());
-                streamOut.writeObject(disconnectMessage);
-                streamOut.flush();
+                if(clientThread.t.isAlive())
+                {
+                    logger.debug("Sending: " + disconnectMessage.getMessageType());
+                    streamOut.writeObject(disconnectMessage);
+                    streamOut.flush();
+                }
             }
 
         } catch (IOException e)
@@ -141,12 +144,10 @@ public class ClientManager
             throw new RuntimeException(e);
         }
 
-
         try
         {
             if (clientThread != null)
             {
-                clientThread.close();
                 clientThread.stop();
             }
 
@@ -154,32 +155,12 @@ public class ClientManager
             {
                 streamOut.close();
             }
-
-            logger.debug("Closing Socket");
-            if (socket != null)
-            {
-                socket.close();
-            }
         }
         catch (IOException ioe)
         {
             logger.error("Error closing ..." + ioe);
             txtMessage.setText("Error closing ...");
         }
-        if (clientThread != null)
-        {
-            // clientThread.close();
-            clientThread.stop();
-        }
 
     }
-
-
-    void println(String msg)
-    {
-        //display.appendText(msg + "\n");
-        //lblMessage.setText(msg);
-    }
-
-
 }

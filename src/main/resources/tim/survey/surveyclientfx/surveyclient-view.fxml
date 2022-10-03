@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Glow?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -16,10 +17,13 @@
    <children>
       <Label text="Survey Questions">
          <font>
-            <Font size="24.0" />
+            <Font name="Verdana" size="24.0" />
          </font>
+         <effect>
+            <Glow />
+         </effect>
       </Label>
-      <Label prefHeight="18.0" prefWidth="359.0" text="Enter your answers and click Submit" />
+      <Label prefHeight="18.0" prefWidth="359.0" text="Select your answers and click Send" />
       <VBox prefHeight="200.0" prefWidth="100.0">
          <children>
             <HBox prefHeight="100.0" prefWidth="200.0">
@@ -65,7 +69,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="txtAnswer1" HBox.hgrow="ALWAYS">
+                  <TextField fx:id="txtAnswer1" onMouseClicked="#onAnswerClicked" HBox.hgrow="ALWAYS">
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
@@ -79,7 +83,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="txtAnswer2" HBox.hgrow="ALWAYS">
+                  <TextField fx:id="txtAnswer2" onMouseClicked="#onAnswerClicked" HBox.hgrow="ALWAYS">
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
@@ -93,7 +97,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="txtAnswer3" HBox.hgrow="ALWAYS">
+                  <TextField fx:id="txtAnswer3" onMouseClicked="#onAnswerClicked" HBox.hgrow="ALWAYS">
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
@@ -107,7 +111,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="txtAnswer4" HBox.hgrow="ALWAYS">
+                  <TextField fx:id="txtAnswer4" onMouseClicked="#onAnswerClicked" HBox.hgrow="ALWAYS">
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
@@ -121,20 +125,19 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField fx:id="txtAnswer5" HBox.hgrow="ALWAYS">
+                  <TextField fx:id="txtAnswer5" onMouseClicked="#onAnswerClicked" HBox.hgrow="ALWAYS">
                      <HBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </HBox.margin>
                   </TextField>
                </children>
             </HBox>
-            <TextField fx:id="txtResponse" prefHeight="23.0" prefWidth="49.0" />
          </children>
       </VBox>
       <HBox alignment="CENTER" spacing="60.0">
          <children>
             <Button fx:id="btnExit" mnemonicParsing="false" onAction="#onExitClicked" prefHeight="25.0" prefWidth="160.0" text="Exit" />
-            <Button fx:id="btnConnect" mnemonicParsing="false" onAction="#onConnectClicked" prefHeight="25.0" prefWidth="160.0" text="Connect" />
+            <Button fx:id="btnConnect" mnemonicParsing="false" onAction="#onConnectClicked" prefHeight="25.0" prefWidth="210.0" text="Connect" />
             <Button fx:id="btnSend" mnemonicParsing="false" onAction="#onSendClicked" prefHeight="25.0" prefWidth="160.0" text="Send" />
          </children>
          <padding>

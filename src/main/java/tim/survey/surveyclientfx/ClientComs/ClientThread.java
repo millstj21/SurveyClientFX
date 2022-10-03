@@ -53,11 +53,11 @@ public class ClientThread implements Runnable
             logger.error("Error getting input stream: " + ioe.getMessage());
 
             //client2.stop();
-            clientManager.close();
+            //clientManager.close();
         }
     }
 
-    public void close()
+    private void close()
     {
         logger.debug("Closing InputStream.");
         try
@@ -104,6 +104,7 @@ public class ClientThread implements Runnable
                 throw new RuntimeException(e);
             }
         }
+        //close();
         logger.debug("Exiting Thread.");
     }
 }

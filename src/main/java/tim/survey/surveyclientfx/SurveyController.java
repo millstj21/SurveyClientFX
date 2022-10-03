@@ -5,6 +5,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -21,6 +23,14 @@ public class SurveyController implements Initializable
     ClientManager comClientManager;
     SurveyMessagePacket msgPacket;
     Logger logger = LogManager.getLogger();
+
+    // Indicates if a question is waiting to br answered
+    boolean questionWaiting = false;
+    int answerNumber;
+    boolean isConnected = false;
+
+
+    //<editor-fold desc="FXML Declarations">
     @FXML
     private Button btnExit;
     @FXML
@@ -56,6 +66,7 @@ public class SurveyController implements Initializable
     private TextField txtAnswer5;
     @FXML
     private TextArea txtAreaQuestionText;
+    //</editor-fold>
 
 
 
@@ -64,7 +75,17 @@ public class SurveyController implements Initializable
     public void initialize(URL url, ResourceBundle rb)
     {
         logger.debug("Starting Controller initialization.");
+        // disable send button
+        btnSend.setDisable(true);
 
+        // disable text fields for editing
+        txtTopic.setEditable(false);
+        txtAreaQuestionText.setEditable(false);
+        txtAnswer1.setEditable(false);
+        txtAnswer2.setEditable(false);
+        txtAnswer3.setEditable(false);
+        txtAnswer4.setEditable(false);
+        txtAnswer5.setEditable(false);
 
         logger.debug("Finishing Controller initialization.");
 
@@ -80,10 +101,7 @@ public class SurveyController implements Initializable
 
         if(alert.showAndWait().get() == ButtonType.OK)
         {
-            if (comClientManager !=null)
-            {
-                comClientManager.close();
-            }
+            shutdown();
 
             stage = (Stage) scenePane.getScene().getWindow();
             stage.close();
@@ -93,9 +111,25 @@ public class SurveyController implements Initializable
     @FXML
     void onConnectClicked(ActionEvent event)
     {
-        comClientManager = new ClientManager("localhost", 4444, txtMessage, this);
-        logger.debug("Connecting....");
-        comClientManager.connect();
+        if (isConnected)
+        {
+            if (comClientManager !=null)
+            {
+                comClientManager.close();
+            }
+            btnConnect.setText("Connect");
+            isConnected = false;
+        }
+        else
+        {
+            comClientManager = new ClientManager("localhost", 4444, txtMessage, this);
+            logger.debug("Connecting....");
+            isConnected = comClientManager.connect();
+            if (isConnected)
+            {
+                btnConnect.setText("Disconnect");
+            }
+        }
 
     }
 
@@ -105,8 +139,62 @@ public class SurveyController implements Initializable
         msgPacket = new SurveyMessagePacket();
         msgPacket.setQuestionNumber(lblNum.getText());
         msgPacket.setMessageType(SurveyMessagePacket.MessageCodes.Answer);
-        msgPacket.setAnswer(Integer.parseInt(txtResponse.getText()));
+        msgPacket.setAnswer(answerNumber);
         comClientManager.send(msgPacket);
+        setAnswerFieldsBackground();
+        answerNumber = 0;
+        btnSend.setDisable(true);
+        questionWaiting = false;
+    }
+
+    @FXML
+    void onAnswerClicked(MouseEvent event)
+    {
+        // if a questions is waiting:
+        // Set all fields clear
+        // set this field highlighted
+        // set the answer number
+        // Enable send button
+
+        if(questionWaiting)
+        {
+            if (event.getSource() == txtAnswer1)
+            {
+                setAnswerFieldsBackground();
+                txtAnswer1.setStyle("-fx-background-color: red");
+                answerNumber = 1;
+                btnSend.setDisable(false);
+            }
+            if (event.getSource() == txtAnswer2)
+            {
+                setAnswerFieldsBackground();
+                txtAnswer2.setStyle("-fx-background-color: red");
+                answerNumber = 2;
+                btnSend.setDisable(false);
+            }
+            if (event.getSource() == txtAnswer3)
+            {
+                setAnswerFieldsBackground();
+                txtAnswer3.setStyle("-fx-background-color: red");
+                answerNumber = 3;
+                btnSend.setDisable(false);
+            }
+            if (event.getSource() == txtAnswer4)
+            {
+                setAnswerFieldsBackground();
+                txtAnswer4.setStyle("-fx-background-color: red");
+                answerNumber = 4;
+                btnSend.setDisable(false);
+            }
+            if (event.getSource() == txtAnswer5)
+            {
+                setAnswerFieldsBackground();
+                txtAnswer5.setStyle("-fx-background-color: red");
+                answerNumber = 5;
+                btnSend.setDisable(false);
+            }
+        }
+
     }
 
     public synchronized void displayQuestion(SurveyMessagePacket questionPacket)
@@ -121,9 +209,28 @@ public class SurveyController implements Initializable
             txtAnswer4.setText(questionPacket.getAnswer4());
             txtAnswer5.setText(questionPacket.getAnswer5());
 
+            questionWaiting = true;
 
+    }
 
-
+    public void shutdown()
+    {
+        if (isConnected)
+        {
+            if (comClientManager !=null)
+            {
+                comClientManager.close();
+            }
+        }
+    }
+    private void setAnswerFieldsBackground()
+    {
+        var defaultStyle = txtTopic.getStyle();
+        txtAnswer1.setStyle(defaultStyle);
+        txtAnswer2.setStyle(defaultStyle);
+        txtAnswer3.setStyle(defaultStyle);
+        txtAnswer4.setStyle(defaultStyle);
+        txtAnswer5.setStyle(defaultStyle);
     }
 
 

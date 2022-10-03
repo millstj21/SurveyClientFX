@@ -27,15 +27,21 @@ public class SurveyApplication extends Application
         stage.setScene(scene);
         stage.show();
 
+        SurveyController controller = fxmlLoader.getController();
         // Wire up the exitApp.  Consume the event otherwise it will exit anyway.
         stage.setOnCloseRequest(event ->
         {
             event.consume();
-            exitApp(stage);
+            exitApp(stage, controller);
         });
     }
 
-    void exitApp(Stage stage)
+    /**
+     * Initiates the orderly shutdown of the application
+     * @param stage Application stage
+     * @param controller Survey Controller
+     */
+    void exitApp(Stage stage, SurveyController controller)
     {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Exit");
@@ -44,6 +50,7 @@ public class SurveyApplication extends Application
 
         if(alert.showAndWait().get() == ButtonType.OK)
         {
+            controller.shutdown();
 
             stage.close();
         }
