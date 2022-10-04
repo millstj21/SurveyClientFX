@@ -2,8 +2,15 @@ package SurveyMessagePacket;
 
 import java.io.Serializable;
 
+/**
+ * Message packet definition
+ * @version 1.0
+ */
 public class SurveyMessagePacket implements Serializable
 {
+    /**
+     * Enum for the packet type
+     */
     public enum MessageCodes
     {
         Question,
@@ -24,6 +31,7 @@ public class SurveyMessagePacket implements Serializable
 
     private int answer;
 
+    //<editor-fold desc="Getters and Setters">
     public MessageCodes getMessageType()
     {
         return messageType;
@@ -123,4 +131,5 @@ public class SurveyMessagePacket implements Serializable
     {
         this.answer = answer;
     }
+    //</editor-fold>
 }

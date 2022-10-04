@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
+/**
+ * The listener thread for the client.
+ */
 public class ClientThread implements Runnable
 {
     private Socket socket = null;
@@ -20,7 +23,12 @@ public class ClientThread implements Runnable
     Logger logger;
 
 
-
+    /**
+     * Factory method for creating and starting the thread
+     * @param inClientManager a reference to the client manager - the calling class
+     * @param inSocket the socket to listen to
+     * @return Returns a reference to a running listener thread
+     */
     public static ClientThread createAndStartClientThread(ClientManager inClientManager, Socket inSocket)
     {
         ClientThread newThread = new ClientThread(inClientManager, inSocket);
@@ -28,6 +36,12 @@ public class ClientThread implements Runnable
         return newThread;
     }
 
+    /**
+     * Constructor for the listener thread.  Should only be called by the factory method -
+     * createAndStartClientThread(ClientManager inClientManager, Socket inSocket)
+     * @param inClientManager a reference to the client manager - the calling class
+     * @param inSocket the socket to listen to
+     */
     public ClientThread(ClientManager inClientManager, Socket inSocket)
     {
         logger = LogManager.getLogger(ClientThread.class);
@@ -41,7 +55,10 @@ public class ClientThread implements Runnable
 
     }
 
-    public void openSocket()
+    /**
+     * Opens a socket as an ObjectInputStream.
+     */
+    private void openSocket()
     {
         try
         {
@@ -51,12 +68,12 @@ public class ClientThread implements Runnable
         catch (IOException ioe)
         {
             logger.error("Error getting input stream: " + ioe.getMessage());
-
-            //client2.stop();
-            //clientManager.close();
         }
     }
 
+    /**
+     * Closes the input stream socket.
+     */
     private void close()
     {
         logger.debug("Closing InputStream.");
@@ -80,6 +97,11 @@ public class ClientThread implements Runnable
     {
         stopFlag = true;
     }
+
+    /**
+     * Thread startup method.
+     * Opens the socket and listens for a broadcast from the Server.
+     */
     @Override
     public void run()
     {
@@ -104,7 +126,7 @@ public class ClientThread implements Runnable
                 throw new RuntimeException(e);
             }
         }
-        //close();
+
         logger.debug("Exiting Thread.");
     }
 }

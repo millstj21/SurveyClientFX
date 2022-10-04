@@ -69,8 +69,11 @@ public class SurveyController implements Initializable
     //</editor-fold>
 
 
-
-
+    /**
+     * Controller entry point.  Setup for the controller
+     * @param url Used by the application startup
+     * @param rb Used by application startup
+     */
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
@@ -91,6 +94,10 @@ public class SurveyController implements Initializable
 
     }
 
+    /**
+     * Event handler for the exit button.  Exit the application.
+     * @param event Action event
+     */
     @FXML
     void onExitClicked(ActionEvent event)
     {
@@ -108,6 +115,12 @@ public class SurveyController implements Initializable
         }
 
     }
+
+    /**
+     * Event handler for the Connect button.  Attempts to connect to the survey surver.
+     * If already connected, attempts to disconnect.
+     * @param event Action event
+     */
     @FXML
     void onConnectClicked(ActionEvent event)
     {
@@ -133,6 +146,13 @@ public class SurveyController implements Initializable
 
     }
 
+    /**
+     * Event handler for the send button.  If a response is selected, send the appropriate answer.
+     * Only active if:
+     *   a) Connected to a survey server
+     *   b) an answer has been selected
+     * @param event Action event
+     */
     @FXML
     void onSendClicked(ActionEvent event)
     {
@@ -147,6 +167,10 @@ public class SurveyController implements Initializable
         questionWaiting = false;
     }
 
+    /**
+     * Mouse event handler for selecting an answer.  Only active if a question is waiting to be answered.
+     * @param event Mouse Event
+     */
     @FXML
     void onAnswerClicked(MouseEvent event)
     {
@@ -197,6 +221,10 @@ public class SurveyController implements Initializable
 
     }
 
+    /**
+     * Displays a message once one is received.
+     * @param questionPacket A survey message packet of with a MessageCode of Question.
+     */
     public synchronized void displayQuestion(SurveyMessagePacket questionPacket)
     {
 
@@ -213,6 +241,9 @@ public class SurveyController implements Initializable
 
     }
 
+    /**
+     * Shutdown method to ensure the graceful shutdown of the controller.
+     */
     public void shutdown()
     {
         if (isConnected)
@@ -223,6 +254,10 @@ public class SurveyController implements Initializable
             }
         }
     }
+
+    /**
+     * Resets the style of the answer text fields.
+     */
     private void setAnswerFieldsBackground()
     {
         var defaultStyle = txtTopic.getStyle();

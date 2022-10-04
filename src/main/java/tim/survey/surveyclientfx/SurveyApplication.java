@@ -14,6 +14,12 @@ import java.io.IOException;
 public class SurveyApplication extends Application
 {
     private static final Logger logger = LogManager.getLogger(SurveyApplication.class);
+
+    /**
+     * Starts the JavaFX Stage and loads the scene.
+     * @param stage reffernce to the operating system derived stage.
+     * @throws IOException
+     */
     @Override
     public void start(Stage stage) throws IOException
     {
@@ -37,7 +43,7 @@ public class SurveyApplication extends Application
     }
 
     /**
-     * Initiates the orderly shutdown of the application
+     * Initiates the orderly shutdown of the application.
      * @param stage Application stage
      * @param controller Survey Controller
      */
@@ -57,6 +63,10 @@ public class SurveyApplication extends Application
 
     }
 
+    /**
+     * Application entry point.
+     * @param args
+     */
     public static void main(String[] args)
     {
         launch();

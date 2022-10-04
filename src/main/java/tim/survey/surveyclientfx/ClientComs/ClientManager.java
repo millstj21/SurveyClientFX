@@ -11,6 +11,10 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+/**
+ * Manager for the client thread.  Handles received messages and sends responses.
+ * Passes information back to the controller for gui update.
+ */
 public class ClientManager
 {
     private Socket socket = null;
@@ -19,11 +23,22 @@ public class ClientManager
     private ClientThread clientThread = null;
     private String serverName;
     private int serverPort;
+
+    // reference to the message field in the gui
     TextField txtMessage;
+    // reference to the gui Controller
     SurveyController controller;
     Logger logger = LogManager.getLogger();
 
 
+    /**
+     * Constructor for the Client Thread Manager.
+     * Sets up the connection information for the server and back to the controller.
+     * @param server the address of the Survey Server
+     * @param servPort the port for the Survey Server
+     * @param txtMsg reference to the message field in the gui
+     * @param guiController reference to the JavaFX Controller
+     */
     public ClientManager(String server, int servPort, TextField txtMsg, SurveyController guiController)
     {
         txtMessage = txtMsg;
@@ -33,6 +48,10 @@ public class ClientManager
     }
 
 
+    /**
+     * Attempts to establish a connection to the Survey Server and calls open() to start outbound connection stream.
+     * @return True on success, false on failure.
+     */
     public boolean connect()
     {
         logger.debug("Establishing connection.");
@@ -59,14 +78,18 @@ public class ClientManager
         }
     }
 
+    /**
+     * Sends a response to the survey question
+     * @param response A SurveyMessagePacket of type Answer
+     */
     public void send(SurveyMessagePacket response)
     {
         try
         {
             streamOut.writeObject(response);
             streamOut.flush();
-            logger.debug("Sent answer: " + response.getAnswer());
-            txtMessage.setText("SENT: " + response.getAnswer());
+            logger.debug("Sent answer: " + response.getAnswer() + " to question " + response.getQuestionNumber());
+            txtMessage.setText("Response to Q " + response.getQuestionNumber() + " sent.");
 
         }
         catch (IOException ioe)
@@ -76,6 +99,10 @@ public class ClientManager
         }
     }
 
+    /**
+     * Handles incoming message packets
+     * @param inputPacket SurveyMessagePacket from the listener thread.
+     */
     public synchronized void handle(SurveyMessagePacket inputPacket)
     {
         logger.debug("Entering message handler");
@@ -103,7 +130,9 @@ public class ClientManager
         }
     }
 
-
+    /**
+     * Opens the output stream and starts the client listener thread.
+     */
     public void open()
     {
         logger.debug("Opening StreamOut");
@@ -120,6 +149,10 @@ public class ClientManager
         }
     }
 
+    /**
+     * Sends a disconnection message to the server, closes the output stream and
+     * shuts down the listener thread.
+     */
     public void close()
     {
         logger.debug("Closing StreamOut");
@@ -141,7 +174,7 @@ public class ClientManager
         } catch (IOException e)
         {
             logger.error("Error sending disconnect message: "+ e.getMessage());
-            throw new RuntimeException(e);
+            //throw new RuntimeException(e);
         }
 
         try
