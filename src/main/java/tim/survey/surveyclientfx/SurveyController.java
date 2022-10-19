@@ -126,25 +126,15 @@ public class SurveyController implements Initializable
     {
         if (isConnected)
         {
-            if (comClientManager !=null)
-            {
-                comClientManager.close();
-            }
-            btnConnect.setText("Connect");
-            isConnected = false;
+            disconnect();
         }
         else
         {
-            comClientManager = new ClientManager("localhost", 4444, txtMessage, this);
-            logger.debug("Connecting....");
-            isConnected = comClientManager.connect();
-            if (isConnected)
-            {
-                btnConnect.setText("Disconnect");
-            }
+            connect();
         }
-
     }
+
+
 
     /**
      * Event handler for the send button.  If a response is selected, send the appropriate answer.
@@ -268,5 +258,45 @@ public class SurveyController implements Initializable
         txtAnswer5.setStyle(defaultStyle);
     }
 
+    /**
+     * When the survey has ended inform the user.
+     */
+    public synchronized void surveyStopped()
+    {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Complete");
+        alert.setHeaderText("The Survey is now complete.  Thank you for your participation.");
+        alert.setContentText("Press OK to continue");
 
+        alert.showAndWait();
+
+        disconnect();
+    }
+
+    /**
+     * Close the client connection and change the button
+     */
+    private void disconnect()
+    {
+        if (comClientManager !=null)
+        {
+            comClientManager.close();
+        }
+        btnConnect.setText("Connect");
+        isConnected = false;
+    }
+
+    /**
+     * Open the client connection and change the connect button
+     */
+    private void connect()
+    {
+        comClientManager = new ClientManager("localhost", 4444, txtMessage, this);
+        logger.debug("Connecting....");
+        isConnected = comClientManager.connect();
+        if (isConnected)
+        {
+            btnConnect.setText("Disconnect");
+        }
+    }
 }

@@ -2,6 +2,7 @@ package tim.survey.surveyclientfx.ClientComs;
 
 import SurveyMessagePacket.SurveyMessagePacket;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -116,7 +117,13 @@ public class ClientManager
             case Disconnect:
                 // Should not get here
                 logger.debug("Disconnection Message received");
+                Platform.runLater(()->
+                {
+                    controller.surveyStopped();
+                });
+
                 clientThread.stop();
+
                 break;
             case Question:
                 logger.debug("Question number: " + inputPacket.getQuestionNumber() + " received.");
